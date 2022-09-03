@@ -1,0 +1,28 @@
+unsigned long == size_t
+    ex: unsigned log x == size_t x;
+
+
+int argc == número de parâmetros do main
+    -main sempre recebe no mínimo 1 parâmetro, que é o ./(nome do executável);
+ 
+
+char *argv[] == os parâmtros passados para a main
+    -os parâmetros são guardados como string (tipo char);
+
+exemplo de execucão do programa com argc e argv[]:
+    ./(nome do executável) 5 4;   
+        Neste exemplo, argc == 3 (3 argumentos) e argv[0] == ./(nome do executável), argv[1] == 5, argv[2] == 4;
+
+
+struct (nome do registro){
+    tipo campo1;
+    ...
+} (uma ou mais variáveis);
+
+            OU
+
+typedef struct (nome do registro){
+    tipo campo1;
+    ...
+} ("apelido do registro");
+    -geralmente cria-se um ponteiro para a struct, pois na heap tem mais espaço para os dados.

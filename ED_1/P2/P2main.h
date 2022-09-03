@@ -1,0 +1,18 @@
+typedef struct NO* ArvAVL;
+ArvAVL* cria_ArvAVL();
+void libera_ArvAVL(ArvAVL *raiz);
+void libera_NO(struct NO* no);
+int maior(int x, int y);
+int altura_NO(struct NO* no);
+int totalNO_ArvAVL(ArvAVL *raiz);
+int fatorBalanceamento_NO(struct NO* no);
+void RotacaoLL(ArvAVL *A);
+void RotacaoRR(ArvAVL *A);
+void RotacaoLR(ArvAVL *A);
+void RotacaoRL(ArvAVL *A);
+int insere_ArvAVL(ArvAVL *raiz, long int CEPI, long int CEPF, char cidade[], char estado[]);
+int altura_ArvAVL(ArvAVL *raiz);
+void procura_CEP(ArvAVL *raiz, long int CEP);
+void procura_CEP_inicio(ArvAVL *raiz, long int CEP);
+void preOrdem_ArvAVL(ArvAVL *raiz);
+void emOrdem_ArvAVL(ArvAVL *raiz);
