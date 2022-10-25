@@ -2,6 +2,8 @@
 
 #define TAM_PagDisco 960
 #define TAM_cabecalho 21
+#define TAM_registro 64
+#define LIXO "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 
 typedef struct { 
   //registro de cabecalho
@@ -20,14 +22,14 @@ typedef struct {
   char removido[2];
   int encadeamento;
 
-  //Campos de tamanho variavel
+  //Campos de tamanho fixo
   int idConecta;
   char siglaPais[3];
   int idPoPsConectado;
   char unidadeMedida[2];
   int velocidade;
 
-  //Campos de tamanho fixo
+  //Campos de tamanho variavel
   char nomePoPs[100];
   char nomePais[100];
 

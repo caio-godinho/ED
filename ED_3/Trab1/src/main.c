@@ -1,5 +1,6 @@
-#include<stdio.h>
-#include"Funcionalidade1.h"
+#include <stdio.h>
+#include "Funcionalidade1.h"
+#include "Funcionalidade2.h"
 
 int main(void) {
   int funcionalidade;
@@ -11,7 +12,7 @@ int main(void) {
       break;
 
     case 2:
-      // funcionalidade2();
+      funcionalidade2();
       break;
 
     case 3:

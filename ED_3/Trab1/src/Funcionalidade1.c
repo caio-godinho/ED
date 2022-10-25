@@ -1,12 +1,11 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include"structs.h"
-#include"Funcoes_Fornecidas.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "structs.h"
+#include "Funcoes_Fornecidas.h"
 
 void msg_erro() { 
-    printf("Falha no processamento do arquivo\n");
+    printf("Falha no processamento do arquivo.\n");
 }
 
 
@@ -21,9 +20,8 @@ int abre_arquivo(FILE **fp, char *nome_arquivo, char *modo) {
 }
 
 
-void cria_cabecalho(FILE *arquivo_bin) {
+void cria_cabecalho(FILE *arquivo_bin, cabecalho *cab) {
     //inicia variavel do tipo cabecalho
-    cabecalho *cab = (cabecalho*) malloc(sizeof(cabecalho));
     cab->status = '0';
     cab->topo = -1;
     cab->proxRRN = 0;
@@ -125,8 +123,63 @@ void dados_no_registro(char *linha, registro *reg) {
         dado = strtok_r(NULL,",", &resto_string);
         reg->velocidade =  atoi(dado);
     }
-
     //printf("%d,%s,%s,%s,%d,%s,%d\n", reg->idConecta, reg->nomePoPs, reg->nomePais, reg->siglaPais, reg->idPoPsConectado, reg->unidadeMedida, reg->velocidade);
+}
+
+void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
+    char removido[2] = "0";
+    int encadeamento = -1;
+    fwrite(removido, sizeof(char), 1, arquivo_bin);
+    fwrite(&encadeamento, sizeof(int), 1, arquivo_bin);
+    fwrite(&(reg->idConecta), sizeof(int), 1, arquivo_bin);
+    //siglaPais
+    if(strcmp(reg->siglaPais, "\0") == 0){ //valor nulo
+        fwrite(LIXO, sizeof(char), 2, arquivo_bin);
+    }
+    else{
+        fwrite(reg->siglaPais, sizeof(char), 2, arquivo_bin);
+    }
+
+    fwrite(&(reg->idPoPsConectado), sizeof(int), 1, arquivo_bin);
+
+    //unidademedida
+    if(strcmp(reg->unidadeMedida, "\0") == 0){ //valor nulo
+        fwrite(LIXO, sizeof(char), 1, arquivo_bin);
+    }
+    else{
+        fwrite(reg->unidadeMedida, sizeof(char), 1, arquivo_bin);
+    }
+
+    fwrite(&(reg->velocidade), sizeof(int), 1, arquivo_bin);
+
+    //nomepops
+    int tamPoPs = strlen(reg->nomePoPs);
+
+    if(strcmp(reg->nomePoPs, "\0") == 0){ //valor nulo
+        fwrite("|", 1, 1, arquivo_bin);
+    }
+    else{
+        fwrite(reg->nomePoPs, sizeof(char), tamPoPs, arquivo_bin);
+        fwrite("|", 1, 1, arquivo_bin);
+    }   
+
+    //nomePais
+    int tamPais;
+    tamPais = strlen(reg->nomePais);
+    if(strcmp(reg->nomePais, "\0") == 0){ //valor nulo
+        fwrite("|", 1, 1, arquivo_bin);
+    }
+    else{
+        fwrite(reg->nomePais, sizeof(char), tamPais, arquivo_bin);
+        fwrite("|", 1, 1, arquivo_bin);
+    }
+
+    int tam_var = tamPoPs + tamPais + 2;
+    int tam_total = 20 + tam_var;
+
+    for(int i = 0; i < (TAM_registro - tam_total); i++){   //escreve lixo no espaco restante do registro
+        fwrite(LIXO, sizeof(char), 1, arquivo_bin);
+    }         
 }
 
 
@@ -145,26 +198,49 @@ void funcionalidade1() {
         return;
 
     //cria cabecalho do arquivo binario
-    cria_cabecalho(arquivo_saida);
+    cabecalho cab;    
+    cria_cabecalho(arquivo_saida, &cab);
 
     //cria variavel que ira guardar dados do arquivo csv
     registro *reg = (registro*) malloc(sizeof(registro));
 
+
     //le arq csv e escreve em bin
     char linha[100];
     fgets(linha, 100, arquivo_entrada); //pula primeira linha do csv
-    //while(fgets(linha, 100, arquivo_entrada) != NULL) {
+    while(fgets(linha, 100, arquivo_entrada) != NULL) {
       //le dados do arquivo csv: le uma linha do arquivo csv, coloca em um vetor (string), usa funcoes da string.h para manipular ele e colocar informacoes na variavel "reg"
       //e coloca  no arquivo bin
-      fgets(linha, 100, arquivo_entrada);
       dados_no_registro(linha, reg);
+      imprime_arq_bin(arquivo_saida, reg);
+      cab.proxRRN++;
       //imprime dados no arquivo binario
-    //}
-  
-    //Chama binarioNaTela
-    free(arquivo_saida);
-    //binarioNaTela();
+    }
 
+    int num_bytes = cab.proxRRN*64;
+    if(num_bytes%960 == 0){
+        cab.nroPagDisco = num_bytes/960 +1;
+    }
+    else{
+        cab.nroPagDisco = (num_bytes/960) + 2;
+    }
+
+    cab.status = '1';
+
+    fseek(arquivo_saida, 0, SEEK_SET);
+    fwrite(&cab.status, sizeof(char), 1, arquivo_saida);
+
+    fseek(arquivo_saida, 5, SEEK_SET);
+    fwrite(&cab.proxRRN, sizeof(int), 1, arquivo_saida);
+
+    fseek(arquivo_saida, 13, SEEK_SET);
+    fwrite(&cab.nroPagDisco, sizeof(int), 1, arquivo_saida);
+
+    //Chama binarioNaTela
+    fclose(arquivo_saida);
+    
+    binarioNaTela(nome_ArqSaida);
+    
     free(reg);
-    free(arquivo_entrada);
+    fclose(arquivo_entrada);
 }
