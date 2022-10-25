@@ -28,7 +28,7 @@ typedef struct {
   int velocidade;
 
   //Campos de tamanho fixo
-  char *nomePoPs;
-  char *nomePais;
+  char nomePoPs[100];
+  char nomePais[100];
 
 } registro;
