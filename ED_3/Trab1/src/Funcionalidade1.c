@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "structs.h"
 #include "Funcoes_Fornecidas.h"
 
@@ -63,6 +64,14 @@ void tira_virgula(char *resto_string) {
 }
 
 
+void tira_espaco_final(char string[100]) {
+    int ultima_posicao = strlen(string) - 1;
+    if(string[ultima_posicao] == ' ') {
+        string[ultima_posicao] = '\0';
+    }
+}
+
+
 void dados_no_registro(char *linha, registro *reg) {
     char *resto_string;     //ponteiro que aponta para resto da string que ainda nao foi "fatiado" pelo strtok_r
     char *dado;
@@ -78,6 +87,7 @@ void dados_no_registro(char *linha, registro *reg) {
     } else {
         dado = strtok_r(NULL,",", &resto_string);   //coloca informacao em "dado"
         strcpy(reg->nomePoPs, dado);                //coloca informacao no registro
+        tira_espaco_final(reg->nomePoPs);
     }
 
     //le nomePais
@@ -123,7 +133,6 @@ void dados_no_registro(char *linha, registro *reg) {
         dado = strtok_r(NULL,",", &resto_string);
         reg->velocidade =  atoi(dado);
     }
-    //printf("%d,%s,%s,%s,%d,%s,%d\n", reg->idConecta, reg->nomePoPs, reg->nomePais, reg->siglaPais, reg->idPoPsConectado, reg->unidadeMedida, reg->velocidade);
 }
 
 void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
@@ -209,20 +218,19 @@ void funcionalidade1() {
     char linha[100];
     fgets(linha, 100, arquivo_entrada); //pula primeira linha do csv
     while(fgets(linha, 100, arquivo_entrada) != NULL) {
-      //le dados do arquivo csv: le uma linha do arquivo csv, coloca em um vetor (string), usa funcoes da string.h para manipular ele e colocar informacoes na variavel "reg"
-      //e coloca  no arquivo bin
+      //le dados do arquivo csv: le uma linha do arquivo csv, coloca em um vetor (string), usa funcoes da string.h para manipular ele e colocar informacoes na variavel "reg" e coloca  no arquivo bin
       dados_no_registro(linha, reg);
+      //imprime dados no arquivo binario
       imprime_arq_bin(arquivo_saida, reg);
       cab.proxRRN++;
-      //imprime dados no arquivo binario
     }
 
-    int num_bytes = cab.proxRRN*64;
-    if(num_bytes%960 == 0){
-        cab.nroPagDisco = num_bytes/960 +1;
+    int num_bytes = cab.proxRRN*TAM_registro;
+    if(num_bytes%TAM_PagDisco == 0){
+        cab.nroPagDisco = (num_bytes/TAM_PagDisco) + 1;
     }
     else{
-        cab.nroPagDisco = (num_bytes/960) + 2;
+        cab.nroPagDisco = (num_bytes/TAM_PagDisco) + 2;
     }
 
     cab.status = '1';
@@ -238,7 +246,6 @@ void funcionalidade1() {
 
     //Chama binarioNaTela
     fclose(arquivo_saida);
-    
     binarioNaTela(nome_ArqSaida);
     
     free(reg);

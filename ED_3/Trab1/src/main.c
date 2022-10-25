@@ -5,7 +5,6 @@
 int main(void) {
   int funcionalidade;
   scanf("%d", &funcionalidade);
-
   switch (funcionalidade) {
     case 1:
       funcionalidade1();
@@ -32,7 +31,7 @@ int main(void) {
       break;
 
     default:
-      printf("Funcionalidade invalida\n");
+      printf("Funcionalidade invalida.\n");
   }
   
   return 0;
