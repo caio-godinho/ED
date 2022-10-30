@@ -3,10 +3,15 @@
 #include <string.h>
 #include "structs.h"
 #include "Funcoes_Fornecidas.h"
+#include "Funcionalidade1.h"
 
 void le_cabecalho(cabecalho *cab, FILE *arquivo){
     fseek(arquivo, 0, SEEK_SET);
     fread(&cab->status, sizeof(char), 1, arquivo);
+    if(cab->status == '0'){
+        msg_erro();
+        exit(0);
+    }
     fread(&cab->topo, sizeof(int), 1, arquivo);
     fread(&cab->proxRRN, sizeof(int), 1, arquivo);
     fread(&cab->nroRegRem, sizeof(int), 1, arquivo);
@@ -15,13 +20,13 @@ void le_cabecalho(cabecalho *cab, FILE *arquivo){
 }
 
 void le_arquivo(cabecalho cab, registro *reg, FILE *arquivo){
+    int offset;
+    char removido;
     for(int i = 0; i < cab.proxRRN; i++){
-        int offset = 960 + 64*i;
+        offset = 960 + 64*i;
         fseek(arquivo, offset, SEEK_SET);
-        char removido;
         fread(&removido, sizeof(char), 1, arquivo);
-        if(removido == '1'){
-            printf("Registro inexistente.\n\n");
+        if(removido == '1'){ // se o registro estiver removido, pula para o proximo loop/registro
             continue;
         }
 
@@ -91,6 +96,9 @@ void funcionalidade2(){
     le_cabecalho(&cab, arquivo_bin);
     le_arquivo(cab, reg, arquivo_bin);
 
+    if(cab.nroPagDisco == 1){ // apenas cabecalho
+        printf("Registro inexistente.\n\n");
+    }
     printf("Numero de paginas de disco: %d\n\n",cab.nroPagDisco);
 
     free(reg);

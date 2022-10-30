@@ -1,4 +1,7 @@
-#include<stdio.h>
+#ifndef _STRUCTS_
+#define _STRUCTS_
+
+#include <stdio.h>
 
 #define TAM_PagDisco 960
 #define TAM_cabecalho 21
@@ -34,3 +37,5 @@ typedef struct {
   char nomePais[100];
 
 } registro;
+
+#endif

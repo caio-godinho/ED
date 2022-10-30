@@ -4,11 +4,11 @@
 #include <ctype.h>
 #include "structs.h"
 #include "Funcoes_Fornecidas.h"
+#include "Funcionalidade1.h"
 
 void msg_erro() { 
     printf("Falha no processamento do arquivo.\n");
 }
-
 
 //abre arquivo com determinado modo
 int abre_arquivo(FILE **fp, char *nome_arquivo, char *modo) {
@@ -19,7 +19,6 @@ int abre_arquivo(FILE **fp, char *nome_arquivo, char *modo) {
     }
     return 0;
 }
-
 
 void cria_cabecalho(FILE *arquivo_bin, cabecalho *cab) {
     //inicia variavel do tipo cabecalho
@@ -41,7 +40,6 @@ void cria_cabecalho(FILE *arquivo_bin, cabecalho *cab) {
         fwrite("$", sizeof(char), 1, arquivo_bin); 
 }
 
-
 int confere_string(const char *string) {
     char vazio[3];                      //string que indica campo vazio no arquivo csv
     strcpy(vazio, ",");
@@ -51,7 +49,6 @@ int confere_string(const char *string) {
     
     return 1;                           //caso o proximo campo nao seja vazio, retorna 1
 }
-
 
 void tira_virgula(char *resto_string) {
     char aux[50];
@@ -63,14 +60,12 @@ void tira_virgula(char *resto_string) {
     resto_string[i] = '\0';
 }
 
-
 void tira_espaco_final(char string[100]) {
     int ultima_posicao = strlen(string) - 1;
     if(string[ultima_posicao] == ' ') {
         string[ultima_posicao] = '\0';
     }
 }
-
 
 void dados_no_registro(char *linha, registro *reg) {
     char *resto_string;     //ponteiro que aponta para resto da string que ainda nao foi "fatiado" pelo strtok_r
@@ -149,6 +144,7 @@ void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
         fwrite(reg->siglaPais, sizeof(char), 2, arquivo_bin);
     }
 
+    //idPoPsConectado
     fwrite(&(reg->idPoPsConectado), sizeof(int), 1, arquivo_bin);
 
     //unidademedida
@@ -159,6 +155,7 @@ void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
         fwrite(reg->unidadeMedida, sizeof(char), 1, arquivo_bin);
     }
 
+    //Velocidade
     fwrite(&(reg->velocidade), sizeof(int), 1, arquivo_bin);
 
     //nomepops
@@ -190,7 +187,6 @@ void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
         fwrite(LIXO, sizeof(char), 1, arquivo_bin);
     }         
 }
-
 
 //le arquivo.csv e escreve dados em arquivo binario
 void funcionalidade1() {
