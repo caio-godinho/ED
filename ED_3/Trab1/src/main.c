@@ -1,3 +1,5 @@
+//Alunos: Caio Oliveira Godinho / (12731996) / Participação: 100% ; Guilherme Chiarotto de Moraes / (12745229) / Participação: 100%.
+
 #include <stdio.h>
 #include "Funcionalidade1.h"
 #include "Funcionalidade2.h"

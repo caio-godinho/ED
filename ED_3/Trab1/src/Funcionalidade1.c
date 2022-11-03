@@ -4,41 +4,7 @@
 #include <ctype.h>
 #include "structs.h"
 #include "Funcoes_Fornecidas.h"
-#include "Funcionalidade1.h"
-
-void msg_erro() { 
-    printf("Falha no processamento do arquivo.\n");
-}
-
-//abre arquivo com determinado modo
-int abre_arquivo(FILE **fp, char *nome_arquivo, char *modo) {
-    (*fp) = fopen(nome_arquivo, modo);
-    if((*fp) == NULL) {
-        msg_erro();
-        return -1;
-    }
-    return 0;
-}
-
-void cria_cabecalho(FILE *arquivo_bin, cabecalho *cab) {
-    //inicia variavel do tipo cabecalho
-    cab->status = '0';
-    cab->topo = -1;
-    cab->proxRRN = 0;
-    cab->nroRegRem = 0;
-    cab->nroPagDisco = 0;
-    cab->qttCompacta = 0;
-
-    //escreve cabecalho no arquivo binario
-    fwrite(&cab->status, sizeof(char), 1, arquivo_bin);
-    fwrite(&(cab->topo), sizeof(int), 1, arquivo_bin);
-    fwrite(&(cab->proxRRN), sizeof(int), 1, arquivo_bin);
-    fwrite(&(cab->nroRegRem), sizeof(int), 1, arquivo_bin);
-    fwrite(&(cab->nroPagDisco), sizeof(int), 1, arquivo_bin);
-    fwrite(&(cab->qttCompacta), sizeof(int), 1, arquivo_bin);
-    for(int i = 0; i < (TAM_PagDisco-TAM_cabecalho); i++)    //escreve lixo no espaco restante da pagina de disco
-        fwrite("$", sizeof(char), 1, arquivo_bin); 
-}
+#include "Funcoes_comuns.h"
 
 int confere_string(const char *string) {
     char vazio[3];                      //string que indica campo vazio no arquivo csv
@@ -50,6 +16,7 @@ int confere_string(const char *string) {
     return 1;                           //caso o proximo campo nao seja vazio, retorna 1
 }
 
+
 void tira_virgula(char *resto_string) {
     char aux[50];
     int i;
@@ -60,12 +27,14 @@ void tira_virgula(char *resto_string) {
     resto_string[i] = '\0';
 }
 
+
 void tira_espaco_final(char string[100]) {
     int ultima_posicao = strlen(string) - 1;
     if(string[ultima_posicao] == ' ') {
         string[ultima_posicao] = '\0';
     }
 }
+
 
 void dados_no_registro(char *linha, registro *reg) {
     char *resto_string;     //ponteiro que aponta para resto da string que ainda nao foi "fatiado" pelo strtok_r
@@ -128,64 +97,6 @@ void dados_no_registro(char *linha, registro *reg) {
         dado = strtok_r(NULL,",", &resto_string);
         reg->velocidade =  atoi(dado);
     }
-}
-
-void imprime_arq_bin(FILE *arquivo_bin, registro *reg){
-    char removido[2] = "0";
-    int encadeamento = -1;
-    fwrite(removido, sizeof(char), 1, arquivo_bin);
-    fwrite(&encadeamento, sizeof(int), 1, arquivo_bin);
-    fwrite(&(reg->idConecta), sizeof(int), 1, arquivo_bin);
-    //siglaPais
-    if(strcmp(reg->siglaPais, "\0") == 0){ //valor nulo
-        fwrite(LIXO, sizeof(char), 2, arquivo_bin);
-    }
-    else{
-        fwrite(reg->siglaPais, sizeof(char), 2, arquivo_bin);
-    }
-
-    //idPoPsConectado
-    fwrite(&(reg->idPoPsConectado), sizeof(int), 1, arquivo_bin);
-
-    //unidademedida
-    if(strcmp(reg->unidadeMedida, "\0") == 0){ //valor nulo
-        fwrite(LIXO, sizeof(char), 1, arquivo_bin);
-    }
-    else{
-        fwrite(reg->unidadeMedida, sizeof(char), 1, arquivo_bin);
-    }
-
-    //Velocidade
-    fwrite(&(reg->velocidade), sizeof(int), 1, arquivo_bin);
-
-    //nomepops
-    int tamPoPs = strlen(reg->nomePoPs);
-
-    if(strcmp(reg->nomePoPs, "\0") == 0){ //valor nulo
-        fwrite("|", 1, 1, arquivo_bin);
-    }
-    else{
-        fwrite(reg->nomePoPs, sizeof(char), tamPoPs, arquivo_bin);
-        fwrite("|", 1, 1, arquivo_bin);
-    }   
-
-    //nomePais
-    int tamPais;
-    tamPais = strlen(reg->nomePais);
-    if(strcmp(reg->nomePais, "\0") == 0){ //valor nulo
-        fwrite("|", 1, 1, arquivo_bin);
-    }
-    else{
-        fwrite(reg->nomePais, sizeof(char), tamPais, arquivo_bin);
-        fwrite("|", 1, 1, arquivo_bin);
-    }
-
-    int tam_var = tamPoPs + tamPais + 2;
-    int tam_total = 20 + tam_var;
-
-    for(int i = 0; i < (TAM_registro - tam_total); i++){   //escreve lixo no espaco restante do registro
-        fwrite(LIXO, sizeof(char), 1, arquivo_bin);
-    }         
 }
 
 //le arquivo.csv e escreve dados em arquivo binario

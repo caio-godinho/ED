@@ -3,9 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include "structs.h"
-#include "Funcionalidade1.h"
-#include "Funcionalidade2.h"
-#include "Funcionalidade3.h"
+#include "Funcoes_comuns.h"
 #include "Funcoes_Fornecidas.h"
 
 void insere_registro(registro *reg, cabecalho *cab, FILE *arq) {
@@ -75,6 +73,11 @@ void funcionalidade5() {
   //copia cabecalho para variavel "cab"; funcao confere o status 
   le_cabecalho(&cab, arquivo_entrada);
 
+  //muda status para inconsistente (0)
+  char status = '0';
+  fseek(arquivo_entrada, 0, SEEK_SET);
+  fwrite(&status, sizeof(char), 1, arquivo_entrada);
+
   char **idConecta;
   char **nomePoPs;
   char **nomePais;
@@ -111,6 +114,11 @@ void funcionalidade5() {
 
     insere_registro(reg_aux, &cab, arquivo_entrada);
   }
+
+  //muda status para consistente (1)
+  status = '1';
+  fseek(arquivo_entrada, 0, SEEK_SET);
+  fwrite(&status, sizeof(char), 1, arquivo_entrada);
 
   fclose(arquivo_entrada);
   binarioNaTela(nome_ArqEntrada);

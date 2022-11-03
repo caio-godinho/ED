@@ -3,21 +3,8 @@
 #include <string.h>
 #include "structs.h"
 #include "Funcoes_Fornecidas.h"
-#include "Funcionalidade1.h"
+#include "Funcoes_comuns.h"
 
-void le_cabecalho(cabecalho *cab, FILE *arquivo){
-    fseek(arquivo, 0, SEEK_SET);
-    fread(&cab->status, sizeof(char), 1, arquivo);
-    if(cab->status == '0'){
-        msg_erro();
-        exit(0);
-    }
-    fread(&cab->topo, sizeof(int), 1, arquivo);
-    fread(&cab->proxRRN, sizeof(int), 1, arquivo);
-    fread(&cab->nroRegRem, sizeof(int), 1, arquivo);
-    fread(&cab->nroPagDisco, sizeof(int), 1, arquivo);
-    fread(&cab->qttCompacta, sizeof(int), 1, arquivo);
-}
 
 void le_arquivo(cabecalho cab, registro *reg, FILE *arquivo){
     int offset;

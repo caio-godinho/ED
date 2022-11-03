@@ -1,5 +1,4 @@
-#include "Funcionalidade1.h"
-#include "Funcionalidade2.h"
+#include "Funcoes_comuns.h"
 #include "Funcoes_Fornecidas.h"
 #include "structs.h"
 #include <stdio.h>
@@ -20,6 +19,7 @@ void escreve_cabecalho(cabecalho *cab, FILE *arquivo_entrada, FILE* arquivo_said
   fread(&cab->nroPagDisco, sizeof(int), 1, arquivo_entrada);
   fread(&cab->qttCompacta, sizeof(int), 1, arquivo_entrada);
 
+  cab->status = '0';
   fwrite(&cab->status, sizeof(char), 1, arquivo_saida);
   fwrite(&cab->topo, sizeof(int), 1, arquivo_saida);
   fwrite(&cab->proxRRN, sizeof(int), 1, arquivo_saida);
@@ -29,6 +29,7 @@ void escreve_cabecalho(cabecalho *cab, FILE *arquivo_entrada, FILE* arquivo_said
   for(int i = 0; i < (TAM_PagDisco-TAM_cabecalho); i++)    //escreve lixo no espaco restante da pagina de disco
     fwrite("$", sizeof(char), 1, arquivo_saida);   
 }
+
 int compacta_arquivo(cabecalho cab, registro *reg, FILE *arquivo_entrada, FILE *arquivo_saida){ // ignora os arquivos marcados como 1 no campo removido e escreve no arquivo saida
     int RRN_disponivel = 0;
     int offset;
@@ -100,6 +101,11 @@ void funcionalidade6(){
     }
 
     // ESCREVE OS DADOS DO CABECALHO Q FORAM ATUALIZADOS  
+    cab.status = '1';
+
+    fseek(arquivo_saida, 0, SEEK_SET);
+    fwrite(&cab.status, sizeof(char), 1, arquivo_saida);  
+  
     fseek(arquivo_saida, 1, SEEK_SET);
     fwrite(&cab.topo, sizeof(int), 1, arquivo_saida);
 
@@ -115,8 +121,10 @@ void funcionalidade6(){
     fseek(arquivo_saida, 17, SEEK_SET);
     fwrite(&cab.qttCompacta, sizeof(int), 1, arquivo_saida);
 
+    rename("binario_compactado.bin", nome_ArqEntrada);
+
     fclose(arquivo_entrada);
     fclose(arquivo_saida);
-    binarioNaTela("binario_compactado.bin");
+    binarioNaTela(nome_ArqEntrada);
     free(reg);
 }

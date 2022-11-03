@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "structs.h"
-#include "Funcionalidade1.h"
-#include "Funcionalidade2.h"
-#include "Funcionalidade3.h"
+#include "Funcoes_comuns.h"
 #include "Funcoes_Fornecidas.h"
 
 void incrementa_nroRegRem(FILE *arq, const int RRN)  {
@@ -14,7 +12,6 @@ void incrementa_nroRegRem(FILE *arq, const int RRN)  {
     nroRegRem++;
     fseek(arq, -sizeof(int), SEEK_CUR);
     fwrite(&nroRegRem, sizeof(int), 1, arq);
-    //fseeK(arq, 960 + 64*RRN, SEEK_SET);
 }
 
 void atualiza_encadeamento(FILE *arq, const int RRN) {
@@ -25,7 +22,6 @@ void atualiza_encadeamento(FILE *arq, const int RRN) {
     fwrite(&RRN, sizeof(int), 1, arq);                      //escreve no topo o RRN do ultimo registro removido
     fseek(arq, (960 + 64*RRN) + sizeof(char), SEEK_SET);    //volta ponteiro para "encadeamento" do registro removido
     fwrite(&valor_topo, sizeof(int), 1, arq);               //escreve valor_topo (RRN do proximo registro removido) no encadeamento
-    //printf("%d\n", valor_topo);
 }
 
 void imprime_lixo(FILE *arq) {
@@ -43,11 +39,6 @@ void remove_registro(FILE *arq, char *nomeCampo, char *valorCampo) {
     char c;
     int RRN = 0;
     char removido = '1';
-
-    /*
-    char fodase;
-    int karalho;
-    */
 
     while(fread(&c, 1, 1, arq) != 0) {                  //confere se arquivo chegou ao fim
         fseek(arq, -1, SEEK_CUR);
@@ -71,14 +62,6 @@ void remove_registro(FILE *arq, char *nomeCampo, char *valorCampo) {
                 incrementa_nroRegRem(arq, RRN);                            //incrementa "nroRegRem" do cabecalho
                 atualiza_encadeamento(arq, RRN);                           //atualiza "encadeamento" do registro e "topo" do cabecalho
                 imprime_lixo(arq);                                         //imprime lixo nos campos do registro e pula para proximo registro
-
-                /*
-                fseek(arq, -64, SEEK_CUR);
-                fread(&fodase, sizeof(char), 1, arq);
-                fread(&karalho, sizeof(int), 1, arq);
-                printf("%c %d %d\n", fodase, karalho, RRN);
-                fseek(arq, 64 - (sizeof(char) + sizeof(int)), SEEK_CUR);
-                */
 
             } else {                                                                    //se idConecta nao tem o valor buscado
                 fseek(arq, TAM_registro - (sizeof(char) + sizeof(int)*2), SEEK_CUR);    //pula para proximo registro
@@ -172,7 +155,6 @@ void remove_registro(FILE *arq, char *nomeCampo, char *valorCampo) {
             fseek(arq, sizeof(char)*4 + sizeof(int)*4, SEEK_CUR);
             le_campoVariavel(arq, reg_aux.nomePoPs, &j);
             le_campoVariavel(arq, reg_aux.nomePais, &k);
-            //printf("%s\n", reg_aux.nomePais);
             if(strcmp(reg_aux.nomePais, valorCampo) == 0) {                        //se o registro deve ser removido
                 fseek(arq, -(sizeof(char)*4 + sizeof(int)*4 + j + k), SEEK_CUR);   //volta para comeco dos campos de controle do registro
                 fwrite(&removido, sizeof(char), 1, arq);                           //imprime 1 na flag de removido do registro
@@ -189,7 +171,6 @@ void remove_registro(FILE *arq, char *nomeCampo, char *valorCampo) {
     }
 }
 
-
 void funcionalidade4() {
     FILE *arquivo_entrada;
     char nome_ArqEntrada[30];
@@ -204,22 +185,33 @@ void funcionalidade4() {
     //copia cabecalho para variavel "cab"; funcao confere o status 
     le_cabecalho(&cab, arquivo_entrada);
 
+    //muda status para inconsistente (0)
+    char status = '0';
+    fseek(arquivo_entrada, 0, SEEK_SET);
+    fwrite(&status, sizeof(char), 1, arquivo_entrada);
+  
+  
     //cria e aloca espaco para listas que guardarao os nomes e valores dos campos a serem buscados
     char **nomeCampo;
     char **valorCampo;
     aloca_listaCampo(&nomeCampo, n);
     aloca_listaCampo(&valorCampo, n);
+  
     //le campos a serem buscados
     le_listaCampo(nomeCampo, valorCampo, n);
-
-    //printf("%s %s\n", nomeCampo[0], valorCampo[0]);
 
     //remove registros
     for(int i = 0; i < n; i++) {  
         remove_registro(arquivo_entrada, nomeCampo[i], valorCampo[i]);
     }
 
+    //muda status para consistente (1)
+    status = '1';
+    fseek(arquivo_entrada, 0, SEEK_SET);
+    fwrite(&status, sizeof(char), 1, arquivo_entrada);
+  
     fclose(arquivo_entrada);
+  
     binarioNaTela(nome_ArqEntrada);
 
     destroi_listaCampo(&nomeCampo, n);

@@ -1,20 +1,10 @@
-#include "Funcionalidade1.h"
-#include "Funcionalidade2.h"
+#include "Funcoes_comuns.h"
 #include "Funcoes_Fornecidas.h"
 #include "structs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-
-void le_campoVariavel(FILE *arq, char *string, int *i) {
-  *i = 0;
-  do{
-      fread(&(string[*i]), 1, 1, arq);
-      (*i)++;
-  }while(string[*i - 1] != '|');
-  string[*i - 1] = '\0';
-}
 
 int le_registro(FILE *arquivo, registro *reg, int *TAM_reg) {
   //conefere se registro foi removido
@@ -34,12 +24,13 @@ int le_registro(FILE *arquivo, registro *reg, int *TAM_reg) {
   reg->unidadeMedida[1] = '\0';
   fread(&(reg->velocidade), sizeof(int), 1, arquivo);
 
+
   //le campos de tamanho variavel
   int j;
   le_campoVariavel(arquivo, reg->nomePoPs, &j);
   int k;
   le_campoVariavel(arquivo, reg->nomePais, &k);
-
+  
   *TAM_reg = 20 + j + k;
   
   return 0;
@@ -48,12 +39,7 @@ int le_registro(FILE *arquivo, registro *reg, int *TAM_reg) {
 int le_campo(FILE *arq, registro *reg, char *nomeCampo, char *valorCampo) {
   int TAM_reg;
   
-  fread(reg->removido, sizeof(char), 1, arq);
-  if(reg->removido[0] == '1') {
-    fseek(arq, TAM_reg - sizeof(char), SEEK_CUR); //pula para proximo registro caso este tenha sido removido
-    return 1;
-  }
-  fseek(arq, sizeof(int), SEEK_CUR);    //pula campo "encadeamento"
+  fseek(arq, sizeof(int) + sizeof(char), SEEK_CUR);    //pula campo "encadeamento"
 
   //caso o campo procurado seja do tipo "idConecta"
   if(strcmp("idConecta",nomeCampo) == 0){
@@ -61,7 +47,6 @@ int le_campo(FILE *arq, registro *reg, char *nomeCampo, char *valorCampo) {
       return 1;
     fseek(arq, -sizeof(int), SEEK_CUR);
     if(reg->idConecta == atoi(valorCampo)) {                     //caso o valor seja igual
-        //puts("oi");
       if(le_registro(arq, reg, &TAM_reg) == 1) {                 //le o registro e coloca na variavel "reg"
         fseek(arq, 64 - (sizeof(char) + sizeof(int)), SEEK_CUR);
         return 1;                                                //retorna 1 caso registro tenha sido removido
@@ -146,7 +131,6 @@ int le_campo(FILE *arq, registro *reg, char *nomeCampo, char *valorCampo) {
 
     int j;
     le_campoVariavel(arq, reg->nomePoPs, &j);
-    printf("%s\n", reg->nomePoPs);
 
     fseek(arq, -(j + sizeof(int)*3 + sizeof(char)*3), SEEK_CUR);
     if(strcmp(reg->nomePoPs, valorCampo) == 0)  {
@@ -182,7 +166,6 @@ int le_campo(FILE *arq, registro *reg, char *nomeCampo, char *valorCampo) {
     }
   }
 
-  
   return 1;
 }
 
@@ -224,6 +207,7 @@ void busca_registros(FILE *arquivo_entrada, char *nomeCampo, char *valorCampo, i
   char c;
   while(fread(&c, 1, 1, arquivo_entrada) != 0) {  //confere se arquivo chegou ao fim
     fseek(arquivo_entrada, -1, SEEK_CUR);
+
     //le campo e confere se possui o valor buscado. Se tiver, imprime
     if(le_campo(arquivo_entrada, &reg_aux, nomeCampo, valorCampo) == 0) {
       print_registro(reg_aux);  
@@ -232,32 +216,6 @@ void busca_registros(FILE *arquivo_entrada, char *nomeCampo, char *valorCampo, i
   }
 }
 
-void aloca_listaCampo(char ***lista, const int n) {
-  *lista = (char**) malloc(sizeof(char *) * n);
-  for(int i = 0; i < n; i++)
-    (*lista)[i] = (char*) malloc(sizeof(char) * 30);
-}
-
-void destroi_listaCampo(char ***lista, const int n) {
-  for(int i = 0; i < n; i++) {
-    free((*lista)[i]);
-    (*lista)[i] = NULL;
-  }
-  free(*lista);
-  *lista = NULL;
-}
-
-void le_listaCampo(char **nomeCampo, char **valorCampo, const int n) {
-  for (int i = 0; i < n; i++) {
-    scanf("%s", nomeCampo[i]);
-    if(strcmp(nomeCampo[i], "idConecta") == 0 || strcmp(nomeCampo[i],"idPoPsConectado") == 0 || strcmp(nomeCampo[i], "velocidade") == 0) {
-      scanf("%s", valorCampo[i]); //se campo for um inteiro, usa scanf normal
-    }
-    else { //se campo for uma string entre aspas, utiliza funcao que le e tira as aspas
-      scan_quote_string(valorCampo[i]);
-    }
-  }
-}
 
 void funcionalidade3() {
   FILE *arquivo_entrada;
@@ -287,7 +245,9 @@ void funcionalidade3() {
   for(int i = 0; i < n; i++) {
     numReg = 0;
     printf("Busca %d\n", (i+1));
+
     busca_registros(arquivo_entrada, nomeCampo[i], valorCampo[i], &numReg);
+    
     if(numReg == 0)
       printf("Registro inexistente.\n\n");
     printf("Numero de paginas de disco: %d\n\n", cab.nroPagDisco);
